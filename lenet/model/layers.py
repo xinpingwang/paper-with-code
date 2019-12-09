@@ -29,12 +29,13 @@ class DropoutConv2d(nn.Module):
     # mapping 指定输入和输出的映射关系，是一个二维数组
     def __init__(self, in_channels, out_channels, mapping, kernel_size, stride=1, padding=0, bias=True):
         super(DropoutConv2d, self).__init__()
-        # 保证 mapping 的长度和 out_channels 一致
-        assert out_channels == len(mapping)
-        self.mapping = mapping
+        # 保证 mapping 的 shape 为 (in_channels, out_channels)
+        assert in_channels == len(mapping) and out_channels == len(mapping[0])
+        mapping = torch.tensor(mapping, dtype=torch.long)
+        self.register_buffer('mapping', mapping)
         self.convs = {}
-        for i in range(len(mapping)):
-            conv = nn.Conv2d(len(mapping[i]), 1, kernel_size, stride=stride, padding=padding, bias=bias)
+        for i in range(self.mapping.size(1)):
+            conv = nn.Conv2d(self.mapping[:, i].sum().item(), 1, kernel_size, stride=stride, padding=padding, bias=bias)
             module_name = 'conv{}'.format(i)
             self.convs[module_name] = conv
             # 通过 add_module 将 conv 中的参数注册到当前模块中
@@ -42,8 +43,8 @@ class DropoutConv2d(nn.Module):
 
     def forward(self, x):
         out = []
-        for i in range(len(self.mapping)):
-            in_channels = torch.tensor(self.mapping[i], dtype=torch.long)
+        for i in range(self.mapping.size(1)):
+            in_channels = self.mapping[:, i].nonzero().squeeze()
             in_tensors = x.index_select(1, in_channels)
             conv_out = self.convs['conv{}'.format(i)](in_tensors)
             out.append(conv_out)
@@ -56,9 +57,9 @@ class RBF(nn.Module):
     def __init__(self, in_features, out_features, init_weight=None):
         super(RBF, self).__init__()
         if init_weight is not None:
-            self.weight = torch.tensor(init_weight)
+            self.register_buffer('weight', torch.tensor(init_weight))
         else:
-            self.weight = torch.rand(in_features, out_features)
+            self.register_buffer('weight', torch.rand(in_features, out_features))
 
     def forward(self, x):
         x = x.unsqueeze(-1)

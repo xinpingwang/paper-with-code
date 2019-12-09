@@ -4,7 +4,7 @@ from tqdm import tqdm
 
 
 def train(model, train_data_loader, test_data_loader, criterion, optimizer, accuracy, epochs,
-          lr_scheduler=None, checkpoint=None, verbose=True):
+          lr_scheduler=None, checkpoint=None, verbose=True, device=torch.device('cpu')):
     train_acc_rates, val_acc_rates = [], []
     for epoch in range(epochs):
         if verbose:
@@ -17,9 +17,9 @@ def train(model, train_data_loader, test_data_loader, criterion, optimizer, accu
             print('\ttraining ...')
         for images, labels in tqdm(train_data_loader):
             optimizer.zero_grad()
-            predicts = model(images)
+            predicts = model(images.to(device))
             # 计算损失函数，并进行反向传播
-            loss = criterion(predicts, labels)
+            loss = criterion(predicts, labels.to(device))
             loss.backward()
             optimizer.step()
             # 统计总数和预测正确的数量
@@ -42,10 +42,10 @@ def train(model, train_data_loader, test_data_loader, criterion, optimizer, accu
             if verbose:
                 print('\t validating ...')
             for images, labels in tqdm(test_data_loader):
-                predicts = model(images)
+                predicts = model(images.to(device))
                 # 统计总数和预测正确的数量
                 total_val_num += len(images)
-                val_accuracy_num += accuracy(predicts, labels)
+                val_accuracy_num += accuracy(predicts, labels.to(device))
         val_acc_rate = val_accuracy_num / total_val_num
         val_acc_rates.append(val_acc_rate)
         if verbose:
