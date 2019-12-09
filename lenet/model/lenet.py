@@ -25,7 +25,7 @@ class LeNet(nn.Module):
 
     def forward(self, x):
         def active(a):
-            return 2 * 1.7259 * torch.sigmoid(4 / 3 * a) - 1
+            return 1.7259 * (2 * torch.sigmoid(4 / 3 * a) - 1)
 
         x = active(self.conv1(x))
         x = active(self.s2(x))
