@@ -48,7 +48,9 @@ EPOCHS = 20
 train_data_loader, test_data_loader = data_loader.load_data('./data', batch_size=BATCH_SIZE)
 model = LeNet()
 criterion = MLELoss()
-optimizer = optim.SGD(model.parameters(), lr=0.0005)
+
+# LambdaLR 设置的学习速率是：初始学习速率 * lambda 函数返回的结果
+optimizer = optim.SGD(model.parameters(), lr=1)
 lr_scheduler = optim.lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda epoch: get_learning_rate(epoch + 1))
 
 if os.path.exists(MODEL_FILE):
