@@ -10,8 +10,10 @@ class AlexNet(nn.Module):
         self.features = nn.Sequential(
             nn.Conv2d(3, 96, 11, stride=4, padding=2),
             nn.ReLU(),
+            nn.LocalResponseNorm(5, k=2),
             nn.Conv2d(96, 256, 5, padding=2),
             nn.ReLU(),
+            nn.LocalResponseNorm(5, k=2),
             nn.MaxPool2d(3, stride=2),
             nn.Conv2d(256, 384, 3, padding=1),
             nn.ReLU(),
