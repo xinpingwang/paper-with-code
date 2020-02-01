@@ -37,6 +37,7 @@ class AlexNet(nn.Module):
 
     def forward(self, x):
         x = self.features(x)
+        x = torch.flatten(x, 1)
         x = self.classifier(x)
         return x
 
@@ -48,3 +49,8 @@ if __name__ == '__main__':
         a = torch.tensor(param.shape, dtype=torch.long)
         total_param_num += a.prod()
     print('There are {} parameters in the model.'.format(total_param_num.item()))
+    # test forward process
+    fake_image = torch.rand((1, 3, 224, 224))
+    alex_net = AlexNet()
+    classes = alex_net(fake_image)
+    print(classes.shape)
