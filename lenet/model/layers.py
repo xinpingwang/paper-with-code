@@ -59,7 +59,8 @@ class RBF(nn.Module):
         if init_weight is not None:
             self.register_buffer('weight', torch.tensor(init_weight))
         else:
-            self.register_buffer('weight', torch.rand(in_features, out_features))
+            # 如果没有提供初始权重，则随机初始化的权重应该是可训练的
+            self.weight = nn.Parameter(torch.rand(in_features, out_features), requires_grad=True)
 
     def forward(self, x):
         x = x.unsqueeze(-1)
